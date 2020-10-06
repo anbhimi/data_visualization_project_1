@@ -1,0 +1,466 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <line rel='stylesheet' type='text/css' href='style.css' />
+    <title>Data Visualization Project-1</title>
+</head>
+<body>
+    
+    <script type="text/javascript">
+        var height = 600;
+        var width = 600;
+        var margin = {left:0, right:0, top:0, bottom:0}
+        var svgContainer = d3.select("body").append("svg")
+                                            .attr("width", "600")
+                                            .attr("height", "800");
+
+        var svg1 = d3.select("body").append("svg")
+                                            .attr("height","600")
+                                            .attr("width","600")
+                                            .attr("transform","translate(0,-200)");
+
+        var svg2 = d3.select("body").append("svg")
+                                            .attr("width", "700")
+                                            .attr("height", "600")
+                                            .attr("transform","translate(550,-300)");
+
+        var chartGroup1 = svgContainer.append("g")
+                .attr("transform","translate("+margin.left+","+margin.top+")");
+
+        var chartGroup2 = svgContainer.append("g")
+                .attr("transform","translate("+margin.left+","+margin.top+")");
+        
+        var tooltip_map = d3.select("body").append("div").style("opacity","0").style("position","absolute");
+
+        // Drawing Map
+        d3.json("streets.json").get(function(error, data){
+
+            for(var p=0;p<data.length;p++){
+                var d =[];
+                for(var j=0;j<data[p].length;j++){
+                d.push({x:data[p][j].x, y: data[p][j].y});
+                }
+                var lineFunction = d3.line()
+                                    .x(function(d,i) { return d.x*25; })
+                                    .y(function(d,i) { return height - d.y*25; })
+                                        .curve(d3.curveLinear);
+
+                var lineGraph = chartGroup1.append("path")
+                                            .attr("d", lineFunction(d))
+                                            .attr("stroke", "black")
+                                            .attr("stroke-width", 2)
+                                            .attr("fill", "none");
+                };
+                
+                // Adding text labels on the map.
+                // Oxford Street
+                svgContainer.append("text")
+                                        .attr("transform", "rotate(-10)")
+                                        .attr("y", "210" )
+                                        .attr("x", "250")
+                                        .attr("dy", "1em")
+                                        .style("text-anchor", "middle")
+                                        .attr("font-family","sans-serif")
+                                        .attr("font-size","10")
+                                        .attr("font-weight","bold")
+                                        .text("OXFORD STREET");
+
+                // Dean Street
+                svgContainer.append("text")
+                                        .attr("transform", "rotate(70)")
+                                        .attr("y", "-330" )
+                                        .attr("x", "450")
+                                        .attr("dy", "1em")
+                                        .style("text-anchor", "middle")
+                                        .attr("font-family","sans-serif")
+                                        .attr("font-size","10")
+                                        .attr("font-weight","bold")
+                                        .text("DEAN STREET");
+
+                // Broad Street
+                svgContainer.append("text")
+                                        .attr("transform", "rotate(-20)")
+                                        .attr("y", "380" )
+                                        .attr("x", "200")
+                                        .attr("dy", "1em")
+                                        .style("text-anchor", "middle")
+                                        .attr("font-family","sans-serif")
+                                        .attr("font-size","10")
+                                        .attr("font-weight","bold")
+                                        .text("BROAD STREET");
+                
+                // Brewery
+                svgContainer.append("text")
+                                        .attr("transform", "rotate(70)")
+                                        .attr("y", "-230" )
+                                        .attr("x", "405")
+                                        .attr("dy", "1em")
+                                        .style("text-anchor", "middle")
+                                        .attr("font-family","sans-serif")
+                                        .attr("font-size","6")
+                                        .attr("font-weight","bold")
+                                        .text("BREWERY");
+
+                // Work House
+                svgContainer.append("text")
+                                        .attr("transform", "rotate(-20)")
+                                        .attr("y", "340" )
+                                        .attr("x", "170")
+                                        .attr("dy", "1em")
+                                        .style("text-anchor", "middle")
+                                        .attr("font-family","sans-serif")
+                                        .attr("font-size","6")
+                                        .attr("font-weight","bold")
+                                        .text("WORK HOUSE");
+
+                // Legend for the Map
+                var gender_colors = ['#fc8d62','#5ab4ac','blue'];
+                var gender_legend = ["Male","Female","Pumps"];
+
+                chartGroup2.append("rect")
+                            .attr("class","legend_1a")
+                            .attr("x","100")
+                            .attr("y","540")
+                            .attr("height","80")
+                            .attr("width","200")
+                            .attr("stroke", "black")
+                            .attr("stroke-width", 2)
+                            .attr("fill","none");
+                
+                chartGroup2.selectAll("text")
+                            .data(gender_legend)
+                            .enter().append("text")
+                            .attr("class","legend_1a")
+                            .attr("x","205")
+                            .attr("y",function(d,i){return 560+i*20})
+                            .attr("text-anchor", "left")
+                            .style("font-size", "16px")
+                            .text(function(d,i){return d;});
+
+                chartGroup2.selectAll("circle")
+                            .data(gender_colors)
+                            .enter().append("circle")
+                            .attr("class","legend_1a")
+                            .attr("cx","180")
+                            .attr("cy",function(d,i){return 555+i*20;})
+                            .attr("r","6")
+                            .attr("stroke", "black")
+                            .attr("fill",function(d,i){return d;})
+
+        });
+
+        // Locating Pumps
+        d3.csv("pumps.csv")
+            .get(function(error, data){
+
+                console.log(data);
+                chartGroup1.selectAll("circle")
+                .data(data)
+                .enter().append("circle")
+                        .attr("class","pumps")
+                        .attr("cx",function(d,i){return d.x*25;})
+                        .attr("cy",function(d,i){return height - d.y*25;})
+                        .attr("r","4")
+                        .attr("fill","blue")
+                        .attr("stroke","blue");
+        });
+
+        // Locating the deaths with a hue on gender
+        d3.csv("deaths_age_sex.csv")
+            .get(function(error, data){
+                deaths_data = data;
+                chartGroup1.selectAll("circle")
+                .data(data)
+                .enter().append("circle")
+                        .attr("class", "deaths_age_sex")
+                        .attr("cx",function(d,i){return d.x*25;})
+                        .attr("cy",function(d,i){return height - d.y*25;})
+                        .attr("r","2")
+                        // .attr("stroke",function(d,i){
+                        //     if (d.gender==0){
+                        //         return "#5ab4ac";
+                        //     } else{
+                        //         return "#fc8d62";
+                        //     }
+                        // })
+                        .attr("stroke", "black")
+                        .attr("stroke-width",0.5)
+                        .attr("fill",function(d,i){
+                            if (d.gender==0){
+                                return "#5ab4ac";
+                            } else{
+                                return "#fc8d62";
+                            }
+                        })
+
+                        .on("mouseover", function(d){
+                            tooltip_map.style("opacity","1")
+                                        .style("left",d3.event.pageX+"px")
+                                        .style("top",d3.event.pageY+"px")
+                                        .style("background","lightsteelblue")
+                                        .style("border-radius","8px")
+                                        .style("padding","2px");
+                                        tooltip_map.html("Gender:"+d.gender+ "<br> Age Group :"+d.age);
+                            })
+                        .on("mouseout", function(d){
+                            tooltip_map.style("opacity","0");
+                        });
+        });
+        
+        var new_data
+        var deaths_data=[];
+        function death_by_index(start_index = 0, end_index = deaths_data.length-1){
+            new_data = deaths_data.slice(start_index, end_index);
+            console.log(new_data);
+            var tooltip_i = d3.select("body").append("div").style("opacity","0").style("position","absolute");
+            chartGroup1.selectAll("circle.deaths_age_sex").remove();
+            chartGroup1.selectAll("circle.deaths_age_sex")
+                .data(new_data)
+                .enter().append("circle")
+                .attr("class", "deaths_age_sex")
+                .attr("cx",function(d,i){return d.x*25;})
+                .attr("cy",function(d,i){return height - d.y*25;})
+                .attr("r","3")
+                // .attr("stroke",function(d,i){
+                //     if (d.gender==0){
+                //         return "#5ab4ac";
+                //     } else{
+                //         return "#fc8d62";
+                //     }
+                // })
+                .attr("stroke", "black")
+                .attr("stroke-width",0.5)
+                .attr("fill",function(d,i){
+                    if (d.gender==0){
+                        return "#5ab4ac";
+                    } else{
+                        return "#fc8d62";
+                    }
+                })
+                .on("mouseover", function(d,i){
+                d3.select(this)
+                    .transition()
+                        .attr("r","6");
+                var gender = "female";
+                var index = d.age;
+                var age = ["0-10","11-20","21-40","41-60","61-80",">80"];
+                if(d.gender==0 ){gender = "male";};
+
+                tooltip_i.html(d)
+                        .style("opacity","1")
+                        .style("left",d3.select(this).attr("cx")+"px")
+                        .style("top",d3.select(this).attr("cy")+200+"px")
+                        .style("background","lightsteelblue")
+                        .style("border-radius","8px")
+                        .style("padding","2px")
+                        .style("position" ,"absolute");
+                        tooltip_i.html("Age:"+age[index]+" <br> Gender:"+ gender);
+                })
+                
+                .on("mouseout", function(d){
+                d3.select(this)
+                    .transition()
+                    .attr("r","2.5");
+                    tooltip_i.style("opacity","0");
+                });
+        };
+
+        // Line plot with interaction
+        var parseDate = d3.timeParse("%d-%b");
+        var formatMonth = d3.timeFormat('%d-%b');
+        d3.csv("deathdays.csv")
+            .row(function(d){return {date: parseDate(d.date), deaths:Number(d.deaths)};})
+            .get(function(error, data){
+            
+            
+            var height = 300;
+            var width = 500;
+            var tooltip = d3.select("body").append("div").style("opacity","0").style("position","absolute");
+
+            var max = d3.max(data, function(d){return d.deaths;});
+            var minDate = d3.min(data, function(d){return d.date;});
+            var maxDate = d3.max(data, function(d){return d.date;});
+
+            var y = d3.scaleLinear()
+                        .domain([0, max])
+                        .range([height,0]);
+
+            var x = d3.scaleTime()
+                        .domain([minDate, maxDate])
+                        .range([0, width]);
+            
+            var yAxis = d3.axisLeft(y);
+            var xAxis = d3.axisBottom(x);
+
+            var margin = {left:50, right:50, top:150, bottom:0};
+
+            var chartGroup = svg1.append("g")
+                            .attr("transform","translate("+margin.left+","+margin.top+")");
+
+            var line = d3.line()
+                        .x(function(d){return x(d.date); })
+                        .y(function(d){return y(d.deaths); });
+
+            chartGroup.append("path").attr("d", line(data));
+            chartGroup.append("g").attr("class","x axis").attr("transform","translate(0,"+height+")").call(xAxis);
+            chartGroup.append("g").attr("class","y axis").call(yAxis)
+
+
+            chartGroup.selectAll("circle")
+                .data(data)
+                .enter().append("circle")
+                        .attr("class", function(d,i){return "grp"+i; })
+                        .attr("cx",function(d,i){return x(d.date);})
+                        .attr("cy",function(d,i){return y(d.deaths);})
+                        .attr("r","3")
+
+                        .on("click", function(d, i){
+                            var total_deaths = 0;
+                            for (var x=0;x<i;x++){
+                                total_deaths = total_deaths + data[x].deaths;
+                            };
+
+                            var start_index = total_deaths;
+                            var end_index = start_index+data[i].deaths;
+
+                            death_by_index(start_index, end_index);
+                            update_bar(start_index, end_index);
+                        })
+
+                        .on("mouseover", function(d){
+                            tooltip.style("opacity","1")
+                                        .style("left",d3.event.pageX+"px")
+                                        .style("top",d3.event.pageY+"px")
+                                        .style("background","lightsteelblue")
+                                        .style("border-radius","8px")
+                                        .style("padding","2px");
+                                        tooltip.html("Date:"+formatMonth(d.date)+ "<br> No.of Deaths :"+d.deaths);
+                            })
+                        .on("mouseout", function(d){
+                            tooltip.style("opacity","0");
+                        });
+
+                        svg1.append("text")
+                                .attr("transform","translate("+(width/2)+" ,"+ (height+200)+")")
+                                .style("text-anchor", "middle")
+                                .text("Date");
+
+                        svg1.append("text")
+                                .attr("transform", "rotate(-90)")
+                                .attr("y", 0)
+                                .attr("x", -height)
+                                .attr("dy", "1em")
+                                .style("text-anchor", "middle")
+                                .text("No.of Deaths");
+            
+
+            // Bar chart with interaction
+            var chartGroup3 = svg2.append("g")
+                                            .attr("transform","translate(100,80)");
+
+            var ages_names = ["0-10","11-20","21-40","41-60","61-80",">80"];
+
+
+            window.update_bar = function (start_index = 0, end_index = deaths_data.length-1){
+                        new_data = deaths_data.slice(start_index, end_index);
+                        var tooltip3 = d3.select("body").append("div").style("opacity","0").style("position","absolute");
+                        nested_data = d3.nest()
+                                        .key(function(d) { return d.age; })
+                                        .key(function(d) { return d.gender; })
+                                        .sortKeys(function(a,b){ return d3.ascending(a.age, b.age);})
+                                        .rollup(function(leaves) { return leaves.length; })
+                                        .entries(new_data);
+                        chartGroup3.selectAll(".age_bars").remove();
+
+                        console.log(nested_data);
+                        var ages_names = ["0-10","11-20","21-40","41-60","61-80",">80"];
+                        var groups = d3.map(nested_data, function(d){return d.key;}).keys();
+                        var groups = groups.sort(function(a,b){return d3.ascending(a,b);});
+
+                            var subgroups = [0,1];
+
+                            var arr=[];
+                            nested_data.map(function(d) {
+                                    arr = arr.concat.apply(arr, d.values);
+                                });
+
+                            maxValue = d3.max(arr, function(d){return d.value;});
+
+                            var x1 = d3.scaleBand()
+                                        .domain(groups)
+                                        .range([0,450])
+                                        .padding(0.2);
+
+                            var y1 = d3.scaleLinear()
+                                    .domain([0,maxValue])
+                                    .range([height,0]);
+
+                            var xSubgroup = d3.scaleBand()
+                                                .domain(subgroups)
+                                                .range([0, x1.bandwidth()])
+                                                .padding([0.05]);
+
+                                var color = d3.scaleOrdinal()
+                                            .domain(subgroups)
+                                            .range(["#fc8d62","#5ab4ac"]);
+                                            
+
+                            var xAxis_1 = d3.axisBottom(x1).ticks(6).tickFormat(function(d,i){
+                                                                                return ages_names[i];});
+                            var yAxis_1 = d3.axisLeft(y1);
+
+                            chartGroup3.append("g").attr("class","age_bars").attr("transform","translate(0,"+height+")").call(xAxis_1);
+                            chartGroup3.append("g").attr("class","age_bars").call(yAxis_1);
+
+                            chartGroup3.append("g")
+                                    .selectAll("g")
+                                    .data(nested_data)
+                                    .enter().append("g")
+                                    .attr("transform", function(d) { return "translate(" + x1(d.key) + ",0)"; })
+                                    .attr("class","age_bars")
+                                    .selectAll("rect")
+                                    .data(function(d){return d.values;})
+                                    .enter().append("rect")
+                                        .attr("x", function(d) { return xSubgroup(d.key); })
+                                        .attr("y", function(d) { return y1(d.value); })
+                                        .attr("width", xSubgroup.bandwidth())
+                                        .attr("height", function(d) { return height - y1(d.value); })
+                                        .attr("fill", function(d) { return color(d.key); })
+                                        .on("mouseover", function(d){
+                                        tooltip3.style("opacity","1")
+                                                    .style("left",d3.event.pageX+"px")
+                                                    .style("top",d3.event.pageY+"px")
+                                                    .style("background","lightsteelblue")
+                                                    .style("border-radius","8px")
+                                                    .style("padding","2px");
+
+                                                tooltip3.html("Number of Deaths:"+d.value);
+                                        })
+                                        .on("mouseout", function(d){
+                                            tooltip3.style("opacity","0");
+                                            this.style.fill=color(d.key);
+                                    });
+                            
+                            svg2.append("text")
+                                .attr("transform","translate("+(width/2)+" ,"+ (height+120)+")")
+                                .style("text-anchor", "middle")
+                                .text("Age Group");
+
+                            svg2.append("text")
+                                    .attr("transform", "rotate(-90)")
+                                    .attr("y", 50)
+                                    .attr("x",-height)
+                                    .attr("dy", "1em")
+                                    .style("text-anchor", "middle")
+                                    .text("No.of Deaths");
+                };
+
+                update_bar();
+        });
+
+        
+    </script>
+</body>
+</html>
